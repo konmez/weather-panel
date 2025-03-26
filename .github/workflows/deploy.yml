@@ -17,13 +17,20 @@ jobs:
         run: find . -name "*.js"
         
       - name: Replace API Key
-        run: |
-          find . -name "*.js" -type f -exec grep -l "__OPENWEATHER_API_KEY__" {} \; | xargs sed -i "s/__OPENWEATHER_API_KEY__/${{ secrets.OPENWEATHER_API_KEY }}/g"
+        env:
+          OPENWEATHER_API_KEY: ${{ secrets.OPENWEATHER_API_KEY }}
+        run: sed -i "s/PLACEHOLDER/${OPENWEATHER_API_KEY}/g"
           
       - name: Debug - Verify Replacement
         run: |
           find . -name "*.js" -type f -exec grep -l "API_KEY" {} \; | xargs cat
           
+      - name: Debug Secret Access
+        env:
+          OPENWEATHER_API_KEY: ${{ secrets.OPENWEATHER_API_KEY }}
+        if: env.OPENWEATHER_API_KEY && env.OPENWEATHER_API_KEY != ''
+        run: echo "Secret is set"
+
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
