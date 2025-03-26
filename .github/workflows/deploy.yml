@@ -1,0 +1,32 @@
+name: Deploy with API Key
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Debug - List files
+        run: ls -la
+        
+      - name: Debug - Find JS files
+        run: find . -name "*.js"
+        
+      - name: Replace API Key
+        run: |
+          find . -name "*.js" -type f -exec grep -l "__OPENWEATHER_API_KEY__" {} \; | xargs sed -i "s/__OPENWEATHER_API_KEY__/${{ secrets.OPENWEATHER_API_KEY }}/g"
+          
+      - name: Debug - Verify Replacement
+        run: |
+          find . -name "*.js" -type f -exec grep -l "API_KEY" {} \; | xargs cat
+          
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: .
+          branch: gh-pages
+          token: ${{ secrets.GITHUB_TOKEN }}
