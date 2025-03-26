@@ -27,10 +27,13 @@ let isMetric = true;
 
 // Use a proxy service to hide your API key
 
-const API_KEY = 'replace with your own API key'; // Get your own API key from https://openweathermap.org/
+//const API_KEY = 'replace with your own API key'; // Get your own API key from https://openweathermap.org/
 
 //const PROXY_URL = 'https://corsproxy.io/?';
 const WEATHER_BASE_URL = 'https://api.openweathermap.org/data/2.5';
+
+const API_KEY = '__OPENWEATHER_API_KEY__';
+
 
 // Initialize the app
 document.addEventListener('DOMContentLoaded', () => {
