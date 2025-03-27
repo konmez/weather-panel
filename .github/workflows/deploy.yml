@@ -15,48 +15,56 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Debug the API key (without showing it)
-      - name: Debug API key
+      # Direct edit of script.js to replace API key
+      - name: Update API key in script.js
         run: |
-          echo "API key exists: ${{ secrets.OPENWEATHER_API_KEY != '' }}"
-          echo "API key length: ${#OPENWEATHER_API_KEY}"
-        env:
-          OPENWEATHER_API_KEY: ${{ secrets.OPENWEATHER_API_KEY }}
-
-      # Create script.js with the correct API key
-      - name: Create script.js with API key
-        run: |
-          # Make sure we're starting with a clean script
-          cat  script.js > script.js
+          # Make a backup of the original script
+          cp script.js script.js.bak
           
-          # Important: Check if API key is actually available
+          # First, check if the API key is available
           if [ -z "${{ secrets.OPENWEATHER_API_KEY }}" ]; then
-            echo "ERROR: OPENWEATHER_API_KEY secret is empty or not set!"
+            echo "ERROR: OPENWEATHER_API_KEY is not set in repository secrets"
             exit 1
           fi
           
-          # Replace all instances of API_KEY definitions with the correct one
-          sed -i 's|//const API_KEY = .*|const API_KEY = "${{ secrets.OPENWEATHER_API_KEY }}";|g' script.js
-          sed -i 's|//let API_KEY = .*|const API_KEY = "${{ secrets.OPENWEATHER_API_KEY }}";|g' script.js
-          sed -i 's|const API_KEY = .*|const API_KEY = "${{ secrets.OPENWEATHER_API_KEY }}";|g' script.js
-          sed -i 's|let API_KEY = .*|const API_KEY = "${{ secrets.OPENWEATHER_API_KEY }}";|g' script.js
-          
-      # Verify the API key replacement
-      - name: Verify API key insertion
-        run: |
-          echo "Lines with API_KEY in script.js:"
-          grep -n "API_KEY" script.js | grep -v "grep" | head -5
-          
-          # Check if API_KEY is properly defined with a non-empty value
-          if grep -q 'API_KEY = "";' script.js; then
-            echo "ERROR: API_KEY is empty in script.js!"
-            exit 1
-          fi
-          
-          if grep -q 'API_KEY = "${{ secrets.OPENWEATHER_API_KEY }}";' script.js; then
-            echo "SUCCESS: API_KEY template is present, will be replaced during deployment"
+          # Look for any pattern of API_KEY in the file and update it
+          if grep -q "API_KEY" script.js; then
+            echo "Found API_KEY references in script.js, updating..."
+            
+            # Replace different forms of API_KEY definitions
+            # Note: This uses direct string replacement, not regex
+            sed -i "s/\/\/const API_KEY = 'PLACEHOLDER';/const API_KEY = '${{ secrets.OPENWEATHER_API_KEY }}';/" script.js
+            sed -i "s/\/\/let API_KEY = 'PLACEHOLDER';/const API_KEY = '${{ secrets.OPENWEATHER_API_KEY }}';/" script.js
+            sed -i "s/const API_KEY = 'PLACEHOLDER';/const API_KEY = '${{ secrets.OPENWEATHER_API_KEY }}';/" script.js
+            sed -i "s/const API_KEY = \"\";/const API_KEY = '${{ secrets.OPENWEATHER_API_KEY }}';/" script.js
+            
+            # If none of the above patterns match, add the API key definition
+            if ! grep -q "const API_KEY = '${{ secrets.OPENWEATHER_API_KEY }}'" script.js; then
+              echo "API key pattern not found. Adding API key definition..."
+              sed -i "/const WEATHER_BASE_URL/a const API_KEY = '${{ secrets.OPENWEATHER_API_KEY }}';" script.js
+            fi
           else
-            echo "ERROR: API_KEY template not found in script.js!"
+            echo "No API_KEY references found. Adding API key definition..."
+            sed -i "/const WEATHER_BASE_URL/a const API_KEY = '${{ secrets.OPENWEATHER_API_KEY }}';" script.js
+          fi
+      
+      # Verify the API key was properly inserted
+      - name: Verify API key
+        run: |
+          echo "Checking API_KEY in script.js:"
+          grep -n "API_KEY" script.js || echo "No API_KEY found!"
+          
+          # Count occurrences to make sure we don't have duplicates
+          API_KEY_COUNT=$(grep -c "API_KEY" script.js || echo 0)
+          echo "Number of API_KEY occurrences: $API_KEY_COUNT"
+          
+          # Final verification
+          if grep -q "const API_KEY = '${{ secrets.OPENWEATHER_API_KEY }}'" script.js; then
+            echo "SUCCESS: API key properly inserted"
+          else
+            echo "ERROR: API key not found in expected format"
+            echo "Diff between original and modified script:"
+            diff script.js.bak script.js || true
             exit 1
           fi
         
@@ -66,3 +74,4 @@ jobs:
         with:
           folder: .
           branch: gh-pages
+          
