@@ -35,7 +35,7 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: '.'
-          name: github-pages-artifact # Explicitly name the artifact
+          name: github-pages-myartifact # Explicitly name the artifact
           
       - name: List files for upload
         run: ls -al    
@@ -50,4 +50,4 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v3
         with:
-          artifact_name: github-pages-artifact # Match the artifact name
+          artifact_name: github-pages-myartifact # Match the artifact name
