@@ -15,37 +15,50 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Create script.js with embedded API key using a more reliable approach
-      - name: Create script.js with embedded API key
+      # Debug the API key (without showing it)
+      - name: Debug API key
         run: |
-          # First, save the full content to a temp file
-          cat script.js > temp_script.js
+          echo "API key exists: ${{ secrets.OPENWEATHER_API_KEY != '' }}"
+          echo "API key length: ${#OPENWEATHER_API_KEY}"
+        env:
+          OPENWEATHER_API_KEY: ${{ secrets.OPENWEATHER_API_KEY }}
+
+      # Create script.js with the correct API key
+      - name: Create script.js with API key
+        run: |
+          # Make sure we're starting with a clean script
+          cat paste.txt > script.js
           
-          # Check if the original has the API_KEY line (commented or not)
-          if grep -q "API_KEY.*PLACEHOLDER" temp_script.js; then
-            echo "Found API_KEY placeholder, replacing it"
-            # Use perl for more reliable replacement
-            perl -i -pe 's|(//)?.*API_KEY.*PLACEHOLDER.*|const API_KEY = "${{ secrets.OPENWEATHER_API_KEY }}";|g' temp_script.js
-          else
-            echo "API_KEY placeholder not found, inserting it after WEATHER_BASE_URL"
-            # Add the API_KEY after WEATHER_BASE_URL
-            perl -i -pe 's|(const WEATHER_BASE_URL.*)|$1\n\nconst API_KEY = "${{ secrets.OPENWEATHER_API_KEY }}";|g' temp_script.js
+          # Important: Check if API key is actually available
+          if [ -z "${{ secrets.OPENWEATHER_API_KEY }}" ]; then
+            echo "ERROR: OPENWEATHER_API_KEY secret is empty or not set!"
+            exit 1
           fi
           
-          # Move to final location
-          mv temp_script.js script.js
+          # Replace all instances of API_KEY definitions with the correct one
+          sed -i 's|//const API_KEY = .*|const API_KEY = "${{ secrets.OPENWEATHER_API_KEY }}";|g' script.js
+          sed -i 's|//let API_KEY = .*|const API_KEY = "${{ secrets.OPENWEATHER_API_KEY }}";|g' script.js
+          sed -i 's|const API_KEY = .*|const API_KEY = "${{ secrets.OPENWEATHER_API_KEY }}";|g' script.js
+          sed -i 's|let API_KEY = .*|const API_KEY = "${{ secrets.OPENWEATHER_API_KEY }}";|g' script.js
           
-      # Display API key line to verify (while hiding the actual key)
+      # Verify the API key replacement
       - name: Verify API key insertion
         run: |
-          echo "Checking if API_KEY is properly defined in script.js:"
-          grep -n "API_KEY" script.js | sed 's/${{ secrets.OPENWEATHER_API_KEY }}//g'
+          echo "Lines with API_KEY in script.js:"
+          grep -n "API_KEY" script.js | grep -v "grep" | head -5
           
-      # List files for verification
-      - name: List files
-        run: |
-          echo "Files ready for deployment:"
-          ls -la
+          # Check if API_KEY is properly defined with a non-empty value
+          if grep -q 'API_KEY = "";' script.js; then
+            echo "ERROR: API_KEY is empty in script.js!"
+            exit 1
+          fi
+          
+          if grep -q 'API_KEY = "${{ secrets.OPENWEATHER_API_KEY }}";' script.js; then
+            echo "SUCCESS: API_KEY template is present, will be replaced during deployment"
+          else
+            echo "ERROR: API_KEY template not found in script.js!"
+            exit 1
+          fi
         
       # Deploy to GitHub Pages
       - name: Deploy to GitHub Pages
@@ -53,3 +66,4 @@ jobs:
         with:
           folder: .
           branch: gh-pages
+          
