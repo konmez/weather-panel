@@ -26,7 +26,7 @@ jobs:
           ls -la
       
       - name: list config.js
-       run: |
+        run: |
           echo "Contents of config.js:"
           cat config.js
         
