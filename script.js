@@ -108,7 +108,7 @@ async function fetchWeatherData(city) {
         const units = isMetric ? 'metric' : 'imperial';
         console.log(444, units);
 
-
+        console.log(1111, API_KEY);
         // Fetch current weather
         //const currentWeatherUrl = `${PROXY_URL}${encodeURIComponent(`${WEATHER_BASE_URL}/weather?q=${city}&appid=${API_KEY}&units=${units}`)}`;
         //let responseData = await fetch(currentWeatherUrl);
