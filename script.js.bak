@@ -32,7 +32,7 @@ let isMetric = true;
 //const PROXY_URL = 'https://corsproxy.io/?';
 const WEATHER_BASE_URL = 'https://api.openweathermap.org/data/2.5';
 
-const API_KEY = '6f3d484d10f1649f03aef1fac4002bf2'; // Get your own API key from https://openweathermap.org/
+const API_KEY = 'PLACEHOLDER'; // Get your own API key from https://openweathermap.org/
 
 
 // Initialize the app
