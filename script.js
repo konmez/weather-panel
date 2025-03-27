@@ -32,7 +32,7 @@ let isMetric = true;
 //const PROXY_URL = 'https://corsproxy.io/?';
 const WEATHER_BASE_URL = 'https://api.openweathermap.org/data/2.5';
 
-const API_KEY = 'PLACEHOLDER'; // Get your own API key from https://openweathermap.org/
+//let API_KEY = 'PLACEHOLDER'; // Get your own API key from https://openweathermap.org/
 
 
 // Initialize the app
@@ -110,7 +110,7 @@ async function fetchWeatherData(city) {
 
         console.log(1111, API_KEY);
 
-        
+
         // Fetch current weather
         //const currentWeatherUrl = `${PROXY_URL}${encodeURIComponent(`${WEATHER_BASE_URL}/weather?q=${city}&appid=${API_KEY}&units=${units}`)}`;
         //let responseData = await fetch(currentWeatherUrl);
