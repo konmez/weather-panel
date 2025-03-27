@@ -27,7 +27,7 @@ jobs:
       - name: Set up API key
         run: |
           # Create a temporary file with API key substituted
-          cat paste.txt | sed "s/const API_KEY = 'PLACEHOLDER';/const API_KEY = '${{ secrets.OPENWEATHER_API_KEY }}';/" > weather.js
+          cat paste.txt | sed "s/const API_KEY = 'PLACEHOLDER';/const API_KEY = '${{ secrets.OPENWEATHER_API_KEY }}';/" > script.js
           # Replace the original file with our modified version
           mv weather.js paste.txt
           
