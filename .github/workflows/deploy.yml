@@ -15,10 +15,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up API key
+      # - name: Set up API key
+      #   run: |
+      #     cat paste.txt | sed "s/const API_KEY = 'PLACEHOLDER';/const API_KEY = '${{ secrets.OPENWEATHER_API_KEY }}';/" > weather.js
+      #     mv  weather.js config.js
+
+      - name: Create config.js with API key
         run: |
-          cat paste.txt | sed "s/const API_KEY = 'PLACEHOLDER';/const API_KEY = '${{ secrets.OPENWEATHER_API_KEY }}';/" > weather.js
-          mv  weather.js config.js
+          echo "// API key for OpenWeatherMap" > config.js
+          echo "const API_KEY = '${{ secrets.OPENWEATHER_API_KEY }}';" >> config.js
       
       - name: List files
         run: |
