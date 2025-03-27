@@ -39,7 +39,7 @@ jobs:
       - name: Verify API key insertion
         run: |
           echo "Checking if API_KEY is properly defined in script.js:"
-          grep -n "API_KEY" script.js | sed 's/${{ secrets.OPENWEATHER_API_KEY }}/[HIDDEN]/g'
+          grep -n "API_KEY" script.js | sed 's/${{ secrets.OPENWEATHER_API_KEY }}//g'
           
       # List files for verification
       - name: List files
