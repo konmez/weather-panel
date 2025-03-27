@@ -34,7 +34,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: '.'
+          path: './'
           name: github-pages-myartifact # Explicitly name the artifact
           
       - name: List files for upload
