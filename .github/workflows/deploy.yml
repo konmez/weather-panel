@@ -18,7 +18,7 @@ jobs:
       - name: Set up API key
         run: |
           cat paste.txt | sed "s/const API_KEY = 'PLACEHOLDER';/const API_KEY = '${{ secrets.OPENWEATHER_API_KEY }}';/" > weather.js
-          mv  weather.js script.js
+          mv  weather.js config.js
       
       - name: List files
         run: |
