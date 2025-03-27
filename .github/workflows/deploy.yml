@@ -15,56 +15,51 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Direct edit of script.js to replace API key
+      # Update API key in script.js
       - name: Update API key in script.js
         run: |
-          # Make a backup of the original script
-          cp script.js script.js.bak
-          
           # First, check if the API key is available
           if [ -z "${{ secrets.OPENWEATHER_API_KEY }}" ]; then
             echo "ERROR: OPENWEATHER_API_KEY is not set in repository secrets"
             exit 1
           fi
           
-          # Look for any pattern of API_KEY in the file and update it
-          if grep -q "API_KEY" script.js; then
-            echo "Found API_KEY references in script.js, updating..."
-            
-            # Replace different forms of API_KEY definitions
-            # Note: This uses direct string replacement, not regex
-            sed -i "s/\/\/const API_KEY = 'PLACEHOLDER';/const API_KEY = '${{ secrets.OPENWEATHER_API_KEY }}';/" script.js
-            sed -i "s/\/\/let API_KEY = 'PLACEHOLDER';/const API_KEY = '${{ secrets.OPENWEATHER_API_KEY }}';/" script.js
-            sed -i "s/const API_KEY = 'PLACEHOLDER';/const API_KEY = '${{ secrets.OPENWEATHER_API_KEY }}';/" script.js
-            sed -i "s/const API_KEY = \"\";/const API_KEY = '${{ secrets.OPENWEATHER_API_KEY }}';/" script.js
-            
-            # If none of the above patterns match, add the API key definition
-            if ! grep -q "const API_KEY = '${{ secrets.OPENWEATHER_API_KEY }}'" script.js; then
-              echo "API key pattern not found. Adding API key definition..."
-              sed -i "/const WEATHER_BASE_URL/a const API_KEY = '${{ secrets.OPENWEATHER_API_KEY }}';" script.js
-            fi
-          else
-            echo "No API_KEY references found. Adding API key definition..."
-            sed -i "/const WEATHER_BASE_URL/a const API_KEY = '${{ secrets.OPENWEATHER_API_KEY }}';" script.js
-          fi
-      
+          # Update API key in script.js
+          sed -i "s/PLACEHOLDER/${{ secrets.OPENWEATHER_API_KEY }}/g" script.js
+          
+      # Add cache-busting to HTML
+      - name: Add cache-busting to HTML
+        run: |
+          # Generate a timestamp for cache busting
+          TIMESTAMP=$(date +%s)
+          
+          # Backup original HTML
+          cp index.html index.html.bak
+          
+          # Update script reference with cache-busting parameter
+          sed -i "s|<script src=\"./script.js\"></script>|<script src=\"./script.js?v=$TIMESTAMP\"></script>|" index.html
+          
+          # Verify changes
+          echo "Updated script tag in HTML:"
+          grep -n "script.js" index.html
+          
       # Verify the API key was properly inserted
       - name: Verify API key
         run: |
-          echo "Checking API_KEY in script.js:"
-          grep -n "API_KEY" script.js || echo "No API_KEY found!"
+          echo "Checking for PLACEHOLDER in script.js:"
+          if grep -q "PLACEHOLDER" script.js; then
+            echo "ERROR: PLACEHOLDER still found in script.js!"
+            exit 1
+          else
+            echo "SUCCESS: No PLACEHOLDERs found in script.js"
+          fi
           
-          # Count occurrences to make sure we don't have duplicates
-          API_KEY_COUNT=$(grep -c "API_KEY" script.js || echo 0)
-          echo "Number of API_KEY occurrences: $API_KEY_COUNT"
-          
-          # Final verification
-          if grep -q "const API_KEY = '${{ secrets.OPENWEATHER_API_KEY }}'" script.js; then
+          # Check for the API key (masked for security)
+          echo "Checking for API_KEY with actual value:"
+          if grep -q "${{ secrets.OPENWEATHER_API_KEY }}" script.js; then
             echo "SUCCESS: API key properly inserted"
           else
-            echo "ERROR: API key not found in expected format"
-            echo "Diff between original and modified script:"
-            diff script.js.bak script.js || true
+            echo "ERROR: API key not found in script.js"
             exit 1
           fi
         
