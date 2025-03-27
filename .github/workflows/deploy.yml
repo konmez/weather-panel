@@ -20,10 +20,17 @@ jobs:
       #     cat paste.txt | sed "s/const API_KEY = 'PLACEHOLDER';/const API_KEY = '${{ secrets.OPENWEATHER_API_KEY }}';/" > weather.js
       #     mv  weather.js config.js
 
-      - name: Create config.js with API key
+
+      - name: Create script.js with embedded API key
         run: |
-          echo "// API key for OpenWeatherMap" > config.js
-          echo "let API_KEY = '${{ secrets.OPENWEATHER_API_KEY }}';" >> config.js
+          # Replace the API key placeholder directly in the script
+          cat paste.txt | sed "s|//let API_KEY = 'PLACEHOLDER';|const API_KEY = '${{ secrets.OPENWEATHER_API_KEY }}';|" > script.js
+          echo "Created script.js with embedded API key"
+
+      # - name: Create config.js with API key
+      #   run: |
+      #     echo "// API key for OpenWeatherMap" > config.js
+      #     echo "let API_KEY = '${{ secrets.OPENWEATHER_API_KEY }}';" >> config.js
       
       - name: List files
         run: |
