@@ -15,58 +15,76 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Update API key in script.js
-      - name: Update API key in script.js
+      # Create a new directory for deployment
+      - name: Prepare deployment directory
         run: |
-          # First, check if the API key is available
-          if [ -z "${{ secrets.OPENWEATHER_API_KEY }}" ]; then
-            echo "ERROR: OPENWEATHER_API_KEY is not set in repository secrets"
-            exit 1
+          mkdir -p deploy
+          cp -r *.html *.css *.png deploy/
+          
+      # Create a completely new script file with the API key
+      - name: Create script.js with API key
+        run: |
+          # Read the original script
+          cat script.js > original_content.txt
+          
+          # Find the line with PLACEHOLDER
+          echo "Looking for PLACEHOLDER in original content..."
+          grep -n "PLACEHOLDER" original_content.txt || echo "PLACEHOLDER not found in grep"
+          
+          # Create a new script with the API key directly substituted
+          echo "Creating new script.js with API key..."
+          cat original_content.txt | sed "s/'PLACEHOLDER'/'${{ secrets.OPENWEATHER_API_KEY }}'/g" > deploy/script.js
+          
+          # Double check if any PLACEHOLDER remains
+          if grep -q "PLACEHOLDER" deploy/script.js; then
+            echo "WARNING: PLACEHOLDER still found in the new script.js"
+            
+            # Try alternative approach - read the file line by line
+            while IFS= read -r line; do
+              # Replace PLACEHOLDER with API key
+              new_line=$(echo "$line" | sed "s/PLACEHOLDER/${{ secrets.OPENWEATHER_API_KEY }}/g")
+              echo "$new_line" >> deploy/script.js.new
+            done < original_content.txt
+            
+            # Check if the new approach worked
+            if grep -q "PLACEHOLDER" deploy/script.js.new; then
+              echo "ERROR: Failed to replace PLACEHOLDER. Manual intervention needed."
+              exit 1
+            else
+              echo "SUCCESS: Alternative approach worked."
+              mv deploy/script.js.new deploy/script.js
+            fi
           fi
-          
-          # Update API key in script.js
-          sed -i "s/PLACEHOLDER/${{ secrets.OPENWEATHER_API_KEY }}/g" script.js
-          
-      # Add cache-busting to HTML
-      - name: Add cache-busting to HTML
-        run: |
-          # Generate a timestamp for cache busting
-          TIMESTAMP=$(date +%s)
-          
-          # Backup original HTML
-          cp index.html index.html.bak
-          
-          # Update script reference with cache-busting parameter
-          sed -i "s|<script src=\"./script.js\"></script>|<script src=\"./script.js?v=$TIMESTAMP\"></script>|" index.html
-          
-          # Verify changes
-          echo "Updated script tag in HTML:"
-          grep -n "script.js" index.html
           
       # Verify the API key was properly inserted
       - name: Verify API key
         run: |
-          echo "Checking for PLACEHOLDER in script.js:"
-          if grep -q "PLACEHOLDER" script.js; then
-            echo "ERROR: PLACEHOLDER still found in script.js!"
+          echo "Checking for PLACEHOLDER in deploy/script.js:"
+          if grep -q "PLACEHOLDER" deploy/script.js; then
+            echo "ERROR: PLACEHOLDER still found in deploy/script.js!"
             exit 1
           else
-            echo "SUCCESS: No PLACEHOLDERs found in script.js"
+            echo "SUCCESS: No PLACEHOLDERs found in deploy/script.js"
           fi
           
-          # Check for the API key (masked for security)
-          echo "Checking for API_KEY with actual value:"
-          if grep -q "${{ secrets.OPENWEATHER_API_KEY }}" script.js; then
+          # Verify API key is present (masked output)
+          echo "Checking API_KEY in deploy/script.js:"
+          if grep -q "${{ secrets.OPENWEATHER_API_KEY }}" deploy/script.js; then
             echo "SUCCESS: API key properly inserted"
           else
-            echo "ERROR: API key not found in script.js"
+            echo "ERROR: API key not found in deploy/script.js"
             exit 1
           fi
+          
+      # List files for verification
+      - name: List deployment files
+        run: |
+          echo "Files ready for deployment:"
+          ls -la deploy/
         
       # Deploy to GitHub Pages
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: .
+          folder: deploy
           branch: gh-pages
-          
