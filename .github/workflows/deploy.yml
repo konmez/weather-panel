@@ -37,10 +37,10 @@ jobs:
           echo "Files in repository:"
           ls -la
       
-      - name: list config.js
-        run: |
-          echo "Contents of config.js:"
-          cat config.js
+      # - name: list config.js
+      #   run: |
+      #     echo "Contents of config.js:"
+      #     cat config.js
         
 
 
