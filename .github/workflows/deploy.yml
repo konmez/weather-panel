@@ -15,37 +15,41 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # - name: Set up API key
-      #   run: |
-      #     cat paste.txt | sed "s/const API_KEY = 'PLACEHOLDER';/const API_KEY = '${{ secrets.OPENWEATHER_API_KEY }}';/" > weather.js
-      #     mv  weather.js config.js
-
-
+      # Create script.js with embedded API key using a more reliable approach
       - name: Create script.js with embedded API key
         run: |
-          # Replace the API key placeholder directly in the script
-          cat script.js | sed "s|//let API_KEY = 'PLACEHOLDER';|const API_KEY = '${{ secrets.OPENWEATHER_API_KEY }}';|" > script.js
-          echo "Created script.js with embedded API key"
-
-      # - name: Create config.js with API key
-      #   run: |
-      #     echo "// API key for OpenWeatherMap" > config.js
-      #     echo "let API_KEY = '${{ secrets.OPENWEATHER_API_KEY }}';" >> config.js
-      
+          # First, save the full content to a temp file
+          cat script.js > temp_script.js
+          
+          # Check if the original has the API_KEY line (commented or not)
+          if grep -q "API_KEY.*PLACEHOLDER" temp_script.js; then
+            echo "Found API_KEY placeholder, replacing it"
+            # Use perl for more reliable replacement
+            perl -i -pe 's|(//)?.*API_KEY.*PLACEHOLDER.*|const API_KEY = "${{ secrets.OPENWEATHER_API_KEY }}";|g' temp_script.js
+          else
+            echo "API_KEY placeholder not found, inserting it after WEATHER_BASE_URL"
+            # Add the API_KEY after WEATHER_BASE_URL
+            perl -i -pe 's|(const WEATHER_BASE_URL.*)|$1\n\nconst API_KEY = "${{ secrets.OPENWEATHER_API_KEY }}";|g' temp_script.js
+          fi
+          
+          # Move to final location
+          mv temp_script.js script.js
+          
+      # Display API key line to verify (while hiding the actual key)
+      - name: Verify API key insertion
+        run: |
+          echo "Checking if API_KEY is properly defined in script.js:"
+          grep -n "API_KEY" script.js | sed 's/${{ secrets.OPENWEATHER_API_KEY }}/[HIDDEN]/g'
+          
+      # List files for verification
       - name: List files
         run: |
-          echo "Files in repository:"
+          echo "Files ready for deployment:"
           ls -la
-      
-      # - name: list config.js
-      #   run: |
-      #     echo "Contents of config.js:"
-      #     cat config.js
         
-
-
+      # Deploy to GitHub Pages
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: .         # The folder the action should deploy
-          branch: gh-pages  # The branch the action should deploy to
+          folder: .
+          branch: gh-pages
