@@ -15,31 +15,38 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Debug the script file contents
+      - name: Debug script file
+        run: |
+          echo "Looking for PLACEHOLDER in script.js:"
+          grep -n "PLACEHOLDER" script.js || echo "Not found with grep"
+          
+          # Check for exact API_KEY declaration pattern
+          echo "Checking for API_KEY declaration:"
+          grep -n "API_KEY" script.js
+
       # Create deployment directory
       - name: Create deployment directory
         run: |
           mkdir -p deploy
           cp style.css *.png deploy/
 
-      # Create a version of the script with API key
+      # Create a completely new script with API key explicitly defined
       - name: Create weather-app.js with API key
         run: |
-          echo "const API_KEY = '${{ secrets.OPENWEATHER_API_KEY }}';" > deploy/weather-app.js
-          tail -n +33 script.js >> deploy/weather-app.js
+          # Create a completely new file with the API key at the top
+          echo "// Weather app script - Generated $(date)" > deploy/weather-app.js
+          echo "// API key for OpenWeatherMap" >> deploy/weather-app.js
+          echo "const API_KEY = '${{ secrets.OPENWEATHER_API_KEY }}';" >> deploy/weather-app.js
+          
+          # Extract the rest of the script but skip any API_KEY declarations
+          cat script.js | grep -v "API_KEY" | grep -v "PLACEHOLDER" >> deploy/weather-app.js
 
-      # Create modified index.html that uses the new script name
+      # Create modified index.html
       - name: Create modified index.html
         run: |
-          # Display original script tag for debugging
-          echo "Original script tag in index.html:"
-          grep -A1 -B1 "script.js" index.html
-          
           # Create modified index.html with new script reference
           sed 's|<script src="./script.js">|<script src="./weather-app.js">|g' index.html > deploy/index.html
-          
-          # Verify the change
-          echo "Modified script tag in deploy/index.html:"
-          grep -A1 -B1 "weather-app.js" deploy/index.html
 
       # Verify the files
       - name: Verify files
@@ -47,6 +54,7 @@ jobs:
           echo "Checking for PLACEHOLDER in weather-app.js"
           if grep -q "PLACEHOLDER" deploy/weather-app.js; then
             echo "ERROR: PLACEHOLDER still found in weather-app.js"
+            cat deploy/weather-app.js | grep -n "PLACEHOLDER"
             exit 1
           fi
           echo "No PLACEHOLDER found, verification successful"
@@ -59,10 +67,6 @@ jobs:
             exit 1
           fi
           
-          # List files to deploy
-          echo "Files to be deployed:"
-          ls -la deploy/
-      
       # Deploy to GitHub Pages
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
