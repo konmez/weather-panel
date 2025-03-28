@@ -33,6 +33,16 @@ jobs:
           echo "Checking for PLACEHOLDER in script"
           ! grep -q "PLACEHOLDER" deploy/script.js || (echo "ERROR: PLACEHOLDER still found" && exit 1)
           echo "No PLACEHOLDER found, verification successful"
+
+
+      
+      # print script.js
+      - name: Print script.js
+        run: |
+          echo "Contents of script.js:"
+          cat deploy/script.js
+      
+              
       
       # Deploy to GitHub Pages
       - name: Deploy to GitHub Pages
