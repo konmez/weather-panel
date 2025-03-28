@@ -1,4 +1,4 @@
-// Weather app script - Generated Fri Mar 28 08:52:01 UTC 2025
+// Weather app script - Generated Fri Mar 28 09:36:01 UTC 2025
 // API key for OpenWeatherMap
 const API_KEY = '6f3d484d10f1649f03aef1fac4002bf2';
 
@@ -31,6 +31,7 @@ let isMetric = true;
 // API key and base URL
 
 const WEATHER_BASE_URL = 'https://api.openweathermap.org/data/2.5';
+
 
 
 
