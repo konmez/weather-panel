@@ -31,16 +31,7 @@ jobs:
           mkdir -p deploy
           cp style.css *.png deploy/
 
-      # # Create a completely new script with API key explicitly defined
-      # - name: Create weather-app.js with API key
-      #   run: |
-      #     # Create a completely new file with the API key at the top
-      #     echo "// Weather app script - Generated $(date)" > deploy/weather-app.js
-      #     echo "// API key for OpenWeatherMap" >> deploy/weather-app.js
-      #     echo "const API_KEY = '${{ secrets.OPENWEATHER_API_KEY }}';" >> deploy/weather-app.js
-          
-      #     # Extract the rest of the script but skip any API_KEY declarations
-      #     cat script.js | grep -v "API_KEY" | grep -v "PLACEHOLDER" >> deploy/weather-app.js
+      
 
       
       # Create a version of the script with API key
