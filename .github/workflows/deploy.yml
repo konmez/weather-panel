@@ -21,21 +21,28 @@ jobs:
           mkdir -p deploy
           cp style.css *.png deploy/
 
-      # Create a version of the script with a different name
+      # Create a version of the script with API key
       - name: Create weather-app.js with API key
         run: |
-          cat script.js | sed "s/'PLACEHOLDER'/'${{ secrets.OPENWEATHER_API_KEY }}'/g" > deploy/weather-app.js
-          echo "const API_KEY = '${{ secrets.OPENWEATHER_API_KEY }}';" > deploy/weather-app.js.new
-          tail -n +33 script.js >> deploy/weather-app.js.new
-          mv deploy/weather-app.js.new deploy/weather-app.js
+          echo "const API_KEY = '${{ secrets.OPENWEATHER_API_KEY }}';" > deploy/weather-app.js
+          tail -n +33 script.js >> deploy/weather-app.js
 
       # Create modified index.html that uses the new script name
       - name: Create modified index.html
         run: |
-          cat index.html | sed 's/<script src="\.\/script\.js"><\/script>/<script src="\.\/weather-app\.js"><\/script>/g' > deploy/index.html
+          # Display original script tag for debugging
+          echo "Original script tag in index.html:"
+          grep -A1 -B1 "script.js" index.html
+          
+          # Create modified index.html with new script reference
+          sed 's|<script src="./script.js">|<script src="./weather-app.js">|g' index.html > deploy/index.html
+          
+          # Verify the change
+          echo "Modified script tag in deploy/index.html:"
+          grep -A1 -B1 "weather-app.js" deploy/index.html
 
-      # Verify the script
-      - name: Verify script
+      # Verify the files
+      - name: Verify files
         run: |
           echo "Checking for PLACEHOLDER in weather-app.js"
           if grep -q "PLACEHOLDER" deploy/weather-app.js; then
@@ -51,6 +58,10 @@ jobs:
             echo "ERROR: index.html does not reference weather-app.js"
             exit 1
           fi
+          
+          # List files to deploy
+          echo "Files to be deployed:"
+          ls -la deploy/
       
       # Deploy to GitHub Pages
       - name: Deploy to GitHub Pages
