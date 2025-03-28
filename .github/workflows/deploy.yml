@@ -42,11 +42,12 @@ jobs:
       #     # Extract the rest of the script but skip any API_KEY declarations
       #     cat script.js | grep -v "API_KEY" | grep -v "PLACEHOLDER" >> deploy/weather-app.js
 
+      
       # Create a version of the script with API key
       - name: Create weather-app.js with API key
         run: |
-      # Create a file with your code but replace the API KEY
-              cat script.js | sed "s/const API_KEY = 'PLACEHOLDER';/const API_KEY = '${{ secrets.OPENWEATHER_API_KEY }}';/g" > deploy/weather-app.js
+         # Create a file with your code but replace the API KEY
+          cat script.js | sed "s/const API_KEY = 'PLACEHOLDER';/const API_KEY = '${{ secrets.OPENWEATHER_API_KEY }}';/g" > deploy/weather-app.js
 
       # Create modified index.html
       - name: Create modified index.html
