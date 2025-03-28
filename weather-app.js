@@ -1,4 +1,8 @@
 
+
+// API key and base URL
+
+const WEATHER_BASE_URL = 'https://api.openweathermap.org/data/2.5';
 const API_KEY = '6f3d484d10f1649f03aef1fac4002bf2'; // Get your own API key from https://openweathermap.org/
 
 // DOM Elements
@@ -26,13 +30,7 @@ let sunset = document.getElementById('sunset');
 let isMetric = true;
 
 
-// API key and base URL
-
-const WEATHER_BASE_URL = 'https://api.openweathermap.org/data/2.5';
-
-
-
-console.log(1111, API_KEY);
+//console.log(1111, API_KEY);
 
 // Initialize the app
 document.addEventListener('DOMContentLoaded', () => {
@@ -90,10 +88,6 @@ function getTodayDate() {
     let options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     return now.toLocaleDateString('en-US', options);
 }
-
-
-
-
 
 
 // Fetch current weather from API
@@ -186,11 +180,7 @@ function displayWeatherToday(data) {
     
     weatherToday.style.display = 'block';
 
-
-
 }
-
-
 
 
 // Display  forecast data
