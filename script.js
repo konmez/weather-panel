@@ -25,15 +25,11 @@ let isMetric = true;
 
 // API key and base URL
 
-// Use a proxy service to hide your API key
-
-//const API_KEY = 'replace with your own API key'; // Get your own API key from https://openweathermap.org/
-
-//const PROXY_URL = 'https://corsproxy.io/?';
 const WEATHER_BASE_URL = 'https://api.openweathermap.org/data/2.5';
 
 const API_KEY = 'PLACEHOLDER'; // Get your own API key from https://openweathermap.org/
 
+console.log(1111, API_KEY);
 
 // Initialize the app
 document.addEventListener('DOMContentLoaded', () => {
@@ -111,12 +107,6 @@ async function fetchWeatherData(city) {
         console.log(1111, API_KEY);
 
 
-        // Fetch current weather
-        //const currentWeatherUrl = `${PROXY_URL}${encodeURIComponent(`${WEATHER_BASE_URL}/weather?q=${city}&appid=${API_KEY}&units=${units}`)}`;
-        //let responseData = await fetch(currentWeatherUrl);
-
-
-
         let responseData = await fetch(
             `${WEATHER_BASE_URL}/weather?q=${city}&appid=${API_KEY}&units=${units}`
         );
@@ -134,9 +124,7 @@ async function fetchWeatherData(city) {
         console.log(22222, currentData);
         
         // Fetch 5-day forecast
-        // Fetch 5-day forecast
-        // const forecastUrl = `${PROXY_URL}${encodeURIComponent(`${WEATHER_BASE_URL}/forecast?q=${city}&appid=${API_KEY}&units=${units}`)}`;
-        // let responseForecastData = await fetch(forecastUrl);
+        
         
         let responseForecastData = await fetch(
             `${WEATHER_BASE_URL}/forecast?q=${city}&appid=${API_KEY}&units=${units}`
@@ -167,19 +155,11 @@ function displayWeatherToday(data) {
     let sunriseTime = new Date(data.sys.sunrise * 1000);
     let sunsetTime = new Date(data.sys.sunset * 1000);
 
-    // Convert temperature to Celsius if it's likely in Kelvin
-        // if (data.main.temp > 150) { // Simple check if temp is likely in Kelvin
-        //     data.main.temp = data.main.temp - 273.15;
-        //     data.main.feels_like = data.main.feels_like - 273.15;
-        // }
-    
     // Display current weather
     cityName.textContent = data.name;
     currentDate.textContent = getTodayDate();
     weatherIcon.src = `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`;
-    weatherIcon.alt = data.weather[0].description;
-
-     
+    weatherIcon.alt = data.weather[0].description;    
 
 
 
@@ -233,15 +213,7 @@ function displayForecast(data) {
         let weatherDesc = day.weather && day.weather.description ? day.weather.description : 'No data';
          
 
-        // Convert temperature to Celsius if it's likely in Kelvin
-        // if (day.main.temp > 150) { // Simple check if temp is likely in Kelvin
-        //     day.main.temp = data.main.temp - 273.15;
-        //     day.main.feels_like = data.main.feels_like - 273.15;
-        // }
-
-
-
-        /////////???????????
+        // Set the card content
         card.innerHTML = `
             <h4>${date.toLocaleDateString('en-US', { weekday: 'long' })}</h4>
             <img src="https://openweathermap.org/img/wn/${weatherIcon}.png" alt="${weatherDesc}">
