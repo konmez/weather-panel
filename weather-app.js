@@ -1,7 +1,5 @@
-// Weather app script - Generated Fri Mar 28 09:36:01 UTC 2025
-// API key for OpenWeatherMap
-const API_KEY = '6f3d484d10f1649f03aef1fac4002bf2';
 
+const API_KEY = '6f3d484d10f1649f03aef1fac4002bf2'; // Get your own API key from https://openweathermap.org/
 
 // DOM Elements
 let cityInput = document.getElementById('city-input');
@@ -34,6 +32,7 @@ const WEATHER_BASE_URL = 'https://api.openweathermap.org/data/2.5';
 
 
 
+console.log(1111, API_KEY);
 
 // Initialize the app
 document.addEventListener('DOMContentLoaded', () => {
@@ -108,9 +107,11 @@ async function fetchWeatherData(city) {
         const units = isMetric ? 'metric' : 'imperial';
         console.log(444, units);
 
+        console.log(1111, API_KEY);
 
 
         let responseData = await fetch(
+            `${WEATHER_BASE_URL}/weather?q=${city}&appid=${API_KEY}&units=${units}`
         );
        
         
@@ -129,6 +130,7 @@ async function fetchWeatherData(city) {
         
         
         let responseForecastData = await fetch(
+            `${WEATHER_BASE_URL}/forecast?q=${city}&appid=${API_KEY}&units=${units}`
         );
 
         if (!responseForecastData.ok) {
