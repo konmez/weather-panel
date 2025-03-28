@@ -1,35 +1,4 @@
-// DOM Elements
-let cityInput = document.getElementById('city-input');
-let searchBtn = document.getElementById('search-btn');
-let errorContainer = document.getElementById('error-container');
-let load_wait = document.getElementById('load_wait');
-let weatherToday = document.getElementById('current-weather');
-let forecastContainer = document.getElementById('forecast-container');
-let weatherCards = document.getElementById('forecast-cards');  
-let howUse = document.getElementById('howUse');
-
-// Current weather elements
-let cityName = document.getElementById('city-name');
-let currentDate = document.getElementById('current-date');
-let weatherIcon = document.getElementById('weather-icon');
-let temperature = document.getElementById('temperature');
-let weatherDescription = document.getElementById('weather-description');
-let feelsLike = document.getElementById('feels-like');
-let humidity = document.getElementById('humidity');
-let windSpeed = document.getElementById('wind-speed');
-let sunrise = document.getElementById('sunrise');
-let sunset = document.getElementById('sunset');
-
-let isMetric = true;
-
-
-// API key and base URL
-
-const WEATHER_BASE_URL = 'https://api.openweathermap.org/data/2.5';
-
-const API_KEY = '6f3d484d10f1649f03aef1fac4002bf2'; // Get your own API key from https://openweathermap.org/
-
-console.log(1111, API_KEY);
+const API_KEY = '6f3d484d10f1649f03aef1fac4002bf2';
 
 // Initialize the app
 document.addEventListener('DOMContentLoaded', () => {
