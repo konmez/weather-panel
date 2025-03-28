@@ -15,57 +15,37 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Create deployment directory
-      - name: Create deployment directory
-        run: |
-          mkdir -p deploy
-          cp style.css *.png deploy/
+      # - name: Set up API key
+      #   run: |
+      #     cat paste.txt | sed "s/const API_KEY = 'PLACEHOLDER';/const API_KEY = '${{ secrets.OPENWEATHER_API_KEY }}';/" > weather.js
+      #     mv  weather.js config.js
 
-      # Create a version of the script with API key
-      - name: Create weather-app.js with API key
-        run: |
-          echo "const API_KEY = '${{ secrets.OPENWEATHER_API_KEY }}';" > deploy/weather-app.js
-          tail -n +33 script.js >> deploy/weather-app.js
 
-      # Create modified index.html that uses the new script name
-      - name: Create modified index.html
+      - name: Create script.js with embedded API key
         run: |
-          # Display original script tag for debugging
-          echo "Original script tag in index.html:"
-          grep -A1 -B1 "script.js" index.html
-          
-          # Create modified index.html with new script reference
-          sed 's|<script src="./script.js">|<script src="./weather-app.js">|g' index.html > deploy/index.html
-          
-          # Verify the change
-          echo "Modified script tag in deploy/index.html:"
-          grep -A1 -B1 "weather-app.js" deploy/index.html
+          # Replace the API key placeholder directly in the script
+          cat script.js | sed "s|//let API_KEY = 'PLACEHOLDER';|const API_KEY = '${{ secrets.OPENWEATHER_API_KEY }}';|" > script.js
+          echo "Created script.js with embedded API key"
 
-      # Verify the files
-      - name: Verify files
-        run: |
-          echo "Checking for PLACEHOLDER in weather-app.js"
-          if grep -q "PLACEHOLDER" deploy/weather-app.js; then
-            echo "ERROR: PLACEHOLDER still found in weather-app.js"
-            exit 1
-          fi
-          echo "No PLACEHOLDER found, verification successful"
-          
-          # Check if index.html references the new script
-          if grep -q "weather-app.js" deploy/index.html; then
-            echo "SUCCESS: index.html now references weather-app.js"
-          else
-            echo "ERROR: index.html does not reference weather-app.js"
-            exit 1
-          fi
-          
-          # List files to deploy
-          echo "Files to be deployed:"
-          ls -la deploy/
+      # - name: Create config.js with API key
+      #   run: |
+      #     echo "// API key for OpenWeatherMap" > config.js
+      #     echo "let API_KEY = '${{ secrets.OPENWEATHER_API_KEY }}';" >> config.js
       
-      # Deploy to GitHub Pages
+      - name: List files
+        run: |
+          echo "Files in repository:"
+          ls -la
+      
+      # - name: list config.js
+      #   run: |
+      #     echo "Contents of config.js:"
+      #     cat config.js
+        
+
+
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: deploy
-          branch: gh-pages
+          folder: .         # The folder the action should deploy
+          branch: gh-pages  # The branch the action should deploy to
